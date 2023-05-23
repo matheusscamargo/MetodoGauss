@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="styles.css">
+    <title>Gauss Solver</title>
+    <style>
+        textarea {
+            width: 400px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Método de Gauss</h1>
+    <h3>Insira os valores da matriz A:</h3>
+    <textarea id="matrixA" placeholder="Exemplo: 2 1 -1; 1 2 1; 1 1 1"></textarea>
+    <h3>Insira os valores do vetor b:</h3>
+    <textarea id="vectorB" placeholder="Exemplo: -3; 3; 2"></textarea>
+    <br>
+    <button onclick="solve()">Solve</button>
+    <br>
+    <h3>Resultado:</h3>
+    <div id="result"></div>
+
+    <script>
+        function metodoGauss(A, b) {
+           
+            for (let k = 0; k < A.length - 1; k++) {
+               
+                let max = Math.abs(A[k][k]);
+                let maxIndex = k;
+                for (let i = k + 1; i < A.length; i++) {
+                    if (max < Math.abs(A[i][k])) {
+                        max = Math.abs(A[i][k]);
+                        maxIndex = i;
+                    }
+                }
+                if (maxIndex != k) {
+                   
+                    for (let j = 0; j < A.length; j++) {
+                        let temp = A[k][j];
+                        A[k][j] = A[maxIndex][j];
+                        A[maxIndex][j] = temp;
+                    }
+                    let temp = b[k];
+                    b[k] = b[maxIndex];
+                    b[maxIndex] = temp;
+                }
+               
+                if (A[k][k] == 0) {
+                    return null;
+                } else {
+                   
+                    for (let m = k + 1; m < A.length; m++) {
+                        let F = -A[m][k] / A[k][k];
+                        A[m][k] = 0; // evita uma iteração
+                        b[m] = b[m] + F * b[k];
+                        for (let l = k + 1; l < A.length; l++) {
+                            A[m][l] = A[m][l] + F * A[k][l];
+                        }
+                    }
+                }
+            }
+         
+            let X = [];
+            for (let i = A.length - 1; i >= 0; i--) {
+                X[i] = b[i];
+                for (let j = i + 1; j < A.length; j++) {
+                    X[i] = X[i] - X[j] * A[i][j];
+                }
+                X[i] = X[i] / A[i][i];
+            }
+            return X;
+        }
+
+        function solve() {
+           
+            let matrixAInput = document.getElementById('matrixA').value;
+            let vectorBInput = document.getElementById('vectorB').value;
+
+           
+            let matrixARows = matrixAInput.trim().split(';');
+            let matrixA = [];
+            for (let i = 0; i < matrixARows.length; i++) {
+                let row = matrixARows[i].trim().split(' ').map(Number);
+                matrixA.push(row);
+            }
+
+            let vectorB = vectorBInput.trim().split(';').map(Number);
+
+           
+            let result = metodoGauss(matrixA, vectorB);
+
+            
+            let resultDiv = document.getElementById('result');
+            if (result === null) {
+                resultDiv.innerHTML = 'Não é possível calcular a solução. Pois a matriz dos coeficientes é singular. ';
+            } else {
+                let resultString = '';
+                for (let i = 0; i < result.length; i++) {
+                    resultString += `x${i + 1} = ${result[i]}\n`;
+                }
+                resultDiv.innerHTML = resultString;
+            }
+        }
+    </script>
+</body>
+</html>
